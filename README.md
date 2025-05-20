@@ -11,7 +11,7 @@ jsonVariant is dual-licensed. You may choose to use it under the restrictions of
 A commercial licence grants you the right to use jsonVariant in your own applications, royalty free, without any requirement to disclose your source code nor any modifications to any other party. 
 A commercial licence is sold per developer but it must take into account the level of support required. Please connect through [LinkedIn](https://www.linkedin.com/in/cosminfrentiu/) to show interest and request a quote or an invoice.  Payment may be made via PayPal, or via bank transfer.  Details will be provided on the invoice.
 
-Please consider supportting this project by donating ("Buy me a coffee", "Paypal").
+Please consider supportting this project by donating ("Buy me a coffee", "Thanks.dev", "Paypal").
 
 ## Usage Instructions
 Simply add JsonVariant.pas in your project and start using it.
