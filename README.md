@@ -22,7 +22,7 @@ To create a JSON variant use one of the VarJSONCreate functions
 | ------ | ----------- |
 | VarJSONCreate()   | empty JSON Object |
 | VarJSONCreate([]) | empty JSON Array |
-| VarJSONCreate([1, "item B", Now]) | dummy JSON Array with 3 values of different types|
+| VarJSONCreate([1, "item B", Now]) | sample JSON Array with 3 values |
 | VarJSONCreate(data) | JSON Object or Array as specified in data string/text |
     
 ### JSON content
@@ -41,9 +41,12 @@ or for an array
 ### JSON output
 To get the JSON text from a JSON Variant one can simply cast it to a string:
 > memJSON.Text := json;
+
 or 
-> memJSON.Text := json.AsString;
-Note: The default output provides a "compact" version of the JSON. To get a "pretty" version, use "~.AsText" function.
+
+> memJSON.Text := json.*AsString*;
+
+**Note**: The default output provides a "compact" version. To get a "pretty" version, use "*AsText*" function.
 
 
 
