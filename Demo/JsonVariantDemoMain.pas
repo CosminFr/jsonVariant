@@ -30,6 +30,7 @@ type
     btnOwnership: TButton;
     btnCase: TButton;
     btnConflicts: TButton;
+    btnDateTime: TButton;
     procedure btnCloseClick(Sender: TObject);
     procedure btnCreateJsonObjectClick(Sender: TObject);
     procedure btnUpdateJsonObjectClick(Sender: TObject);
@@ -43,6 +44,7 @@ type
     procedure btnOwnershipClick(Sender: TObject);
     procedure btnCaseClick(Sender: TObject);
     procedure btnConflictsClick(Sender: TObject);
+    procedure btnDateTimeClick(Sender: TObject);
   private
     procedure StartTest(const aName: String);
     procedure Log(const aText: String);
@@ -422,8 +424,33 @@ begin
     j.Remove('Remove');        //somehow still works as Delphi knows this is a function not property!
 
   Log('JSON after deleting "Remove": ' + j.AsJson);
+end;
 
+procedure TfrmJVDemo.btnDateTimeClick(Sender: TObject);
+var
+  j : Variant;
+  d : TDateTime;
+begin
+  StartTest('Date/Time Demo');
+  //As you might have noticed above, date/time can be assigned to json and it's automatically converted to ISO8601 format
+  //if you want other formats, please use AsDate/AsString functions
+  j := VarJSONCreate;
+  j.Default    := Now;
+  j.SystemDate := AsString(Now-15, 'System');     //ShortDateFormat as configured in your local system (windows)
+  j.MyDate     := AsString(Now, 'DD-MM-YYYY');    //manually specify desired format
 
+  d := AsDate(j.MyDate, 'DD-MM-YYYY');           //j.MyDate is a string, try to convert it to a date using expected format...
+  Log('MyDate from JSON: ' + DateToStr(d));
+
+  d := j.Default;                                //if in ISO8601 format, it may convert to varDate
+  if VarIsType(j.Default, varDate) then                          //otherwise it might be a string
+    Log('Default Date from JSON: ' + DateToStr(d))
+  else
+    Log('Default Date from JSON (not a date?): ' + VarToStr(j.Default));
+  d := AsDate(j.SystemDate);                         //Also tries "System" if the default ISO8601 fails!
+  Log('System Date from JSON: ' + DateToStr(d));
+
+  memJson.Text := j.AsText;
 end;
 
 end.

@@ -193,6 +193,20 @@ object frmJVDemo: TfrmJVDemo
       TabOrder = 11
       OnClick = btnConflictsClick
     end
+    object btnDateTime: TButton
+      Left = 10
+      Top = 636
+      Width = 529
+      Height = 38
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
+      Anchors = [akLeft, akRight, akBottom]
+      Caption = 'JSON Date/Time considerations'
+      TabOrder = 12
+      OnClick = btnDateTimeClick
+    end
   end
   object pnlClient: TPanel
     Left = 0

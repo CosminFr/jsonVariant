@@ -146,7 +146,7 @@
                 </Source>
             </Delphi.Personality>
             <Deployment Version="5">
-                <DeployFile LocalName="Win32\Debug\JsonVariantDemo.exe" Configuration="Debug" Class="ProjectOutput">
+                <DeployFile LocalName="..\Bin\JsonVariantDemo.exe" Configuration="Debug" Class="ProjectOutput">
                     <Platform Name="Win32">
                         <RemoteName>JsonVariantDemo.exe</RemoteName>
                         <Overwrite>true</Overwrite>

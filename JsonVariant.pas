@@ -1,12 +1,26 @@
 unit JsonVariant;
-{=======================================================================================================================
+(***********************************************************************************************************************
 
   Introducing "VarJSON" custom variant.
 
-  Docs TBC!
+  Create a JSON variant with VarJSONCreate functions:
+    * no param => empty JSON Object
+    * const array => JSON Array
+       - use [] for an empty JSON Array
+    * JSON text => JSON variant for whatever Object/Array
 
+  Access JSON properties like you would with a normal delphi object:
+    json := VarJSONCreate('{"Name": "John Smith",	"Phone": "(03) 1234 5555"}');
+    ShowMessage(json.Name + ': ' + json.Phone);
 
-=======================================================================================================================}
+    jArr := VarJSONCreate([1, 2, 4, 8]);
+    jArr.Add(16);
+
+  To get the JSON text from a JSON Variant one can simply cast it to a string:
+    memJSON.Text := json;          //(defaut=~.AsJson) returns a compact JSON
+    memJSON.Text := json.AsText;   //returns a formatted JSON (aka "pretty" version).
+
+***********************************************************************************************************************)
 interface
 
 uses
@@ -155,15 +169,14 @@ begin
     Result := 0
   else begin
     if SameText(aFormat, 'ISO8601') then begin
-      if Length(aValue) < 10  then //don't try to convert from date
-        Result := StrToFloatDef(aValue, 0)
-      else
-        //Try ISO8601
-        if not TryISO8601ToDate(aValue, Result) then
-          //Try with system settings
-          if not TryStrToDateTime(aValue, Result) then
-            //Try from Float value
-            Result := StrToFloatDef(aValue, 0)
+      //Try ISO8601
+      if (Length(aValue) > 9) and TryISO8601ToDate(aValue, Result) then
+        Exit
+      //Try with system settings
+      else if TryStrToDateTime(aValue, Result) then
+        Exit
+      else //Try from Float value
+        Result := StrToFloatDef(aValue, 0);
     end else if SameText(aFormat, 'Numeric') then begin
       Result := StrToFloatDef(aValue, 0)
     end else begin
@@ -430,10 +443,12 @@ var
 begin
   jSource := TJsonVarData(V).Value;
   Result  := True;
-  if SameText(Name, 'ToString') then
+  if MatchText(Name, ['ToString', 'AsString']) then
     Variant(Dest) := jSource.ToString
   else if MatchText(Name, ['ToJson', 'AsJson']) then
     Variant(Dest) := jSource.ToJSON
+  else if MatchText(Name, ['ToText', 'AsText']) then
+    Variant(Dest) := jSource.Format()
   else if MatchText(Name, ['Items', 'Values', 'Get']) then begin
     //There must be only one argument of type Integer!
     Result := (Length(Arguments) = 1) and (Arguments[0].VType = varInteger);
@@ -715,6 +730,8 @@ begin
 end;
 
 function TVarJsonVariant.VariantFromJsonValue(const aJsonValue: TJSONValue): Variant;
+var
+  dt : TDateTime;
 begin
   VarClear(Result);
   if aJsonValue is TJSONNumber then begin
@@ -722,6 +739,9 @@ begin
   end else if aJsonValue is TJSONBool then begin
     Result := TJSONBool(aJsonValue).AsBoolean;
   end else if aJsonValue is TJSONString then begin
+    //For strings of exactly 24 chars check if they are dates in ISO8601 format.
+    if (Length(aJsonValue.Value) = 24) and TryISO8601ToDate(aJsonValue.Value, dt) then
+      Exit(dt);
     Result := aJsonValue.Value;
   end else if (aJsonValue is TJSONObject) or (aJsonValue is TJSONArray) then begin
     TJsonVarData(Result).VType := VarJSON;
