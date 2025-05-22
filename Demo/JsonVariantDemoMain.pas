@@ -183,14 +183,14 @@ begin
     jData := VarJSONCreate(memJson.Text);
 
     StartTest('ParseJsonObject (Version 1) for each name get value');
-    for name in TArray<String>(jData.Names) do
+    for name in NamesOf(jData) do
       Log(name + '=' + VarToStr(jData.Get(name)));
 
 
     StartTest('ParseJsonObject (Version 2) old style for to Count-1 and get name & value by index');
     for i := 0 to jData.Count -1 do begin
-      jVal := jData.Values[i];
       name := jData.Names[i];
+      jVal := jData.Values[i];
       Log(name + '=' + VarToStr(jVal));
     end;
 

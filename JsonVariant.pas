@@ -24,8 +24,8 @@ unit JsonVariant;
 interface
 
 uses
-  System.Classes, System.Variants, System.Generics.Collections,
-  JSON, SysUtils, StrUtils, DateUtils;
+  System.Classes, System.Types, System.SysUtils, System.Variants, System.Generics.Collections, System.JSON,
+  System.StrUtils, System.DateUtils;
 
 
 function VarJSON: TVarType;
@@ -49,6 +49,8 @@ function PeekJsonValue (const aValue : Variant) : TJSONValue;
 function PeekJsonObject(const aValue : Variant) : TJSONObject;
 function PeekJsonArray (const aValue : Variant) : TJSONArray;
 
+function NamesOf(const aValue: Variant): TStringDynArray;
+function ValuesOf(const aValue: Variant): TArray<Variant>;
 
 /// Conversion functions for setting values
 function AsDate(aValue: String; aFormat: String = 'ISO8601') : TDateTime;
@@ -568,7 +570,7 @@ begin
   end else if (jSource is TJSONObject) then begin
     jPair  := TJSONObject(jSource).Pairs[Index];
     Result := Assigned(jPair);
-    if Result and MatchText(Name, ['Values', 'Get']) then begin
+    if Result and MatchText(Name, ['Values', 'Items', 'Get']) then begin
       Variant(Dest) := VariantFromJsonValue(jPair.JsonValue);
     end else if Result and MatchText(Name, ['Names', 'Keys']) then begin
       Variant(Dest) := jPair.JsonString.Value;
@@ -885,6 +887,23 @@ function PeekJsonArray(const aValue : Variant) : TJSONArray;
 begin
   Result := PeekJsonValue(aValue) as TJSONArray;
 end;
+
+function NamesOf(const aValue: Variant): TStringDynArray;
+begin
+  if VarIsJsonObject(aValue) then
+    Result := TStringDynArray(aValue.Names)
+  else
+    Result := nil;
+end;
+
+function ValuesOf(const aValue: Variant): TArray<Variant>;
+begin
+  if VarIsJSON(aValue) then
+    Result := TArray<Variant>(aValue.Values)
+  else
+    Result := nil;
+end;
+
 
 initialization
   _VarDataJSON := TVarJsonVariant.Create;
