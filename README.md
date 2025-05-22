@@ -18,10 +18,10 @@ Simply add JsonVariant.pas in your project and start using it.
 
 ### Create JSON Variant
 To create a JSON variant use one of the VarJSONCreate functions
-| Syntax | Description |
-| ------ | ----------- |
-| VarJSONCreate()   | empty JSON Object |
-| VarJSONCreate([]) | empty JSON Array |
+| Sample            | Description        |
+| ----------------- | ------------------ |
+| VarJSONCreate()   | empty JSON Object  |
+| VarJSONCreate([]) | empty JSON Array   |
 | VarJSONCreate([1, "item B", Now]) | sample JSON Array with 3 values |
 | VarJSONCreate(data) | JSON Object or Array as specified in data string/text |
     
@@ -48,7 +48,8 @@ or
 
 **Note**: The default output provides a "compact" version. To get a "pretty" version, use "*AsText*" function.
 
-### Case sensitivity
+
+### Case sensitivity
 Pay attention to the case of JSON Object properties as JSON is case sensitive! "Name" and "name" are different properties!
 
 ### Name conflict
@@ -63,7 +64,7 @@ For example, a JSON object with property "Count":
 There is no specific type in JSON to handle dates. The usual behaviour is to format the date using *ISO 8601* rules.
 ```
   json.Date := Now;
-  LocalDate := json.Date;           //might raise conversion error if the formatted "Date" string cannot be converted to a TDateTime!
+  LocalDate := json.Date;           //might raise conversion error if it was not converted to a TDateTime!
   LocalDate := AsDate(json.Date);   //ensures the correct type, but returns 0 if conversion fails!
 ```
 If a custom format is used/required, please use the "AsString/AsDate" functions with a specific format:
@@ -76,107 +77,103 @@ If a custom format is used/required, please use the "AsString/AsDate" functions 
 
 #### For both Object and Array
 
-##### ToString, AsString
+***ToString, AsString***  
 Calls "ToString" on the associated TJSONValue.
 
-##### ToJson, AsJson
+***ToJson, AsJson***  
 Calls "ToJSON" on the associated TJSONValue and returns a compact JSON text.
 
-##### ToText, AsText
+***ToText, AsText***  
 Calls "Format" on the associated TJSONValue and returns the indented (aka pretty) formatted JSON text.
 
-##### Items(i), Values(i), Get(i)
-Returns the Variant Value on position "i".  
-May raise "out of range" errors!
+***Items(i), Values(i), Get(i)***  
+Returns the Variant Value on position `i`. May raise "out of range" errors!
+>[!NOTE]
+> Also works as indexed property (aka Items[i], Values[i], Get[i])
 
-**Note**: Also work as indexed properties (aka Items[i], Values[i], Get[i])
-
-##### Items, Values
+***Items, Values***  
 Returns a variant array with the Values. This creates a copy of all values as variants! 
 
-##### IndexOf(str), FindValue(str)
-Returns the index of the value that matches the "str" param; -1 if no match found. 
-
-**Note**: For objects, the "str" is also compared with the key name. So this function can be used to find the position of a specific property in the JSON Object.
+***IndexOf(str), FindValue(str)***  
+Returns the index of the value that matches the `str` param; -1 if no match found. 
+> [!TIP] 
+> For objects, the `str` is also compared with the key name.  
+> Used to find the position of a specific property in the JSON Object.
     
-##### Clear, Empty
+***Clear, Empty***  
 As one would expect removes all pairs/values from the Objecy or Array.
 
 
 #### Specific to Array
 
-##### Add(element)
+***Add(element)***  
 Where "element" is a variant to be added to the list/array.
 
 **Notes**: 
 - If the element is VarJSON, the JSON value is cloned.
 - If the element is an Array, it is added as one element of array type.
 
-##### Append(element)
+***Append(element)***  
 Very similar with "Add". In most cases, it has the same behavior and appends that element to the list. 
 However, if the element is an array, all its elements are added to the list (instead of one array element).
 
-##### Remove(i), Delete(i)
+***Remove(i), Delete(i)***  
 Removes the element on position "i".  
 May raise "out of range" errors!
 
-
 #### Specific to Object
 
-##### Items(name), Values(name), Get(name)
+***Items(name), Values(name), Get(name)***  
 Specific for objects, these functions accept a string value representing the key name and returns the Variant Value for that property.  
+> [!WARNING]
+> if the property with specified name is not found it raises an exception!
 
-**Note**: if the property with specified name is not found it raises an exception!
-
-##### Remove(name), Delete(name)
+***Remove(name), Delete(name)***  
 Removes the pair matching the key name.  
 If there is no matching key name, nothing is removed/deleted!
 
-##### Names[i], Keys[i]
-Returns the key name on position "i".  
+***Names[i], Keys[i]***  
+Returns the key name on position `i`.  
 May raise "out of range" errors!
 
-##### HasProperty(name), HasAttribute(name), HasName(name), HasKey(name)
+***HasProperty(name), HasAttribute(name), HasName(name), HasKey(name)***  
 Checks if the object has a property with the specified name. True if property exists, False otherwise.
 
-##### Names, Keys
+***Names, Keys***  
+<a name="names-keys"></a>
 Returns a variant array with the key names.  
 
 
 #### General functions
 
-##### VarIsJSON, VarIsJsonObject, VarIsJsonArray
+***VarIsJSON, VarIsJsonObject, VarIsJsonArray***  
 Boolean functions to check if the provided variant is JSON (Object or Array).
 
-##### VarJSONCreate
+***VarJSONCreate***  
 See [Create JSON Variant](#create-json-variant)
 
-##### ExtractJsonValue(Variant): TJSONValue;
+***ExtractJsonValue(Variant): TJSONValue;***  
 Creates a new TJSONValue (clone) from the variant! The ownership is passed to the caller => pay attention to memory leaks...
 
-##### PeekJsonValue (Variant) : TJSONValue;
+***PeekJsonValue (Variant) : TJSONValue;***  
 Exposes the JSON Value used by a VarJSON. Returns `nil` for non JSON variants!  
 Ownership is NOT transfered! DO NOT FREE!!!
 
-##### PeekJsonObject(Variant) : TJSONObject;
+***PeekJsonObject(Variant) : TJSONObject;***  
 To avoid type casting, if you know the result is a JSON object.
 
-##### PeekJsonArray (Variant) : TJSONArray;
+***PeekJsonArray (Variant) : TJSONArray;***  
 To avoid type casting, if you know the result is a JSON array.
 
-##### NamesOf(Variant): TStringDynArray;
-Returns a dynamic string array with the key names. Similar with [Names property](#names,-keys) but easier to use in a `for in` loop:
+***NamesOf(Variant): TStringDynArray;***  
+Returns a dynamic string array with the key names. Similar with [Names property](#names-keys) but easier to use in a `for in` loop:
 ```
     for name in NamesOf(json) do
       Log(name + '=' + VarToStr(json.Values(name)));
 ```
 
-##### ValuesOf(Variant): TArray<Variant>;
+***ValuesOf(Variant): TArray<Variant>;***  
 Returns a dynamic Variant array with the values of the JSON Object/Array. This is a copy (clone) of the source JSON variant values! 
-
-
-
-
 
 
 
