@@ -88,6 +88,7 @@ Calls "Format" on the associated TJSONValue and returns the indented (aka pretty
 ##### Items(i), Values(i), Get(i)
 Returns the Variant Value on position "i".  
 May raise "out of range" errors!
+
 **Note**: Also work as indexed properties (aka Items[i], Values[i], Get[i])
 
 ##### Items, Values
@@ -95,6 +96,7 @@ Returns a variant array with the Values. This creates a copy of all values as va
 
 ##### IndexOf(str), FindValue(str)
 Returns the index of the value that matches the "str" param; -1 if no match found. 
+
 **Note**: For objects, the "str" is also compared with the key name. So this function can be used to find the position of a specific property in the JSON Object.
     
 ##### Clear, Empty
@@ -105,6 +107,7 @@ As one would expect removes all pairs/values from the Objecy or Array.
 
 ##### Add(element)
 Where "element" is a variant to be added to the list/array.
+
 **Notes**: 
 - If the element is VarJSON, the JSON value is cloned.
 - If the element is an Array, it is added as one element of array type.
@@ -122,6 +125,7 @@ May raise "out of range" errors!
 
 ##### Items(name), Values(name), Get(name)
 Specific for objects, these functions accept a string value representing the key name and returns the Variant Value for that property.  
+
 **Note**: if the property with specified name is not found it raises an exception!
 
 ##### Remove(name), Delete(name)
@@ -161,7 +165,7 @@ To avoid type casting, if you know the result is a JSON object.
 To avoid type casting, if you know the result is a JSON array.
 
 ##### NamesOf(Variant): TStringDynArray;
-Returns a dynamic string array with the key names. Similar with [Names property](#names-keys) but easier to use in a `for in` loop:
+Returns a dynamic string array with the key names. Similar with [Names property](#names,-keys) but easier to use in a `for in` loop:
 ```
     for name in NamesOf(json) do
       Log(name + '=' + VarToStr(json.Values(name)));
