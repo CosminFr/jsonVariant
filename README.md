@@ -15,18 +15,55 @@ Please consider supportting this project by donating ("Buy me a coffee", "Thanks
 
 ## Usage Instructions
 Simply add JsonVariant.pas in your project and start using it.
+```
+uses
+  System.Variants, JsonVariant;
+```
 
 ### Create JSON Variant
-To create a JSON variant use one of the VarJSONCreate functions
-| Sample            | Description        |
-| ----------------- | ------------------ |
-| VarJSONCreate()   | empty JSON Object  |
-| VarJSONCreate([]) | empty JSON Array   |
-| VarJSONCreate([1, "item B", Now]) | sample JSON Array with 3 values |
-| VarJSONCreate(data) | JSON Object or Array as specified in data string/text |
+To create a JSON variant use one of the VarJSONCreate functions:
+```
+function VarJSONCreate(const aJsonText: String): Variant;     overload;
+function VarJSONCreate: Variant;                              overload;
+function VarJSONCreate(const Args: array of const): Variant;  overload;
+function VarJSONCreate(const aVarArray: Variant): Variant;    overload;
+```
+***JSON from text/string***  
+```
+var
+  jData : Variant;
+begin
+  jData := VarJSONCreate(jsonText);
+```
+> [!WARNING]
+> If `jsonText` does not hold a valid JSON, an `EJSONParseException` is raised.
+
+> [!TIP]
+> Check the exception message for a hint (line, position) where it failed.
     
+***Empty JSON Object***  
+```
+  jData := VarJSONCreate();
+```
+
+***Empty JSON Array***  
+```
+  jData := VarJSONCreate([]);
+```
+***JSON Array from another array***  
+```
+var
+  jPhones : Variant;
+begin
+  jPhones := VarJSONCreate(['0400 123 456', '+614 0012 3333', '(03) 0012 5555']);
+```
+or from a variant array `vArrPhones: Variant`
+```
+  jPhones := VarJSONCreate(vArrPhones);
+```
+
 ### JSON content
-Access JSON properties like you would with a normal delphi object
+Access JSON properties like you would with a normal Delphi object.
 ```
   json := VarJSONCreate('{"Name": "John Smith",	"Phone": "(03) 1234 5555"}');
   json.Height := "1.79m";
@@ -40,25 +77,29 @@ or for an array
 
 ### JSON output
 To get the JSON text from a JSON Variant one can simply cast it to a string:
-> memJSON.Text := json;
-
-or 
-
-> memJSON.Text := json.*AsString*;
-
-**Note**: The default output provides a "compact" version. To get a "pretty" version, use "*AsText*" function.
+```
+  memJSON.Text := json;
+```
+or use one of the custom functions `[As|To][String|JSON|Text]`:
+```
+  memJSON.Text := json.AsString;
+```
+> [!TIP] 
+> The default output provides a "compact" version. To get a "pretty" version, use "*AsText*" function.
 
 
 ### Case sensitivity
-Pay attention to the case of JSON Object properties as JSON is case sensitive! "Name" and "name" are different properties!
+Pay attention to the case of JSON Object properties as JSON is case sensitive! `Name` and `name` are different properties!
 
 ### Name conflict
 If a property of the JSON object conflicts with a custom VarJSON property or function, the former "wins". However, since JSON object property is case sensitive while Delphi functions are not, a simple solution to avoid the conflict is to use a different case.
 
 For example, a JSON object with property "Count":
-> json:= VarJSONCreate('{"Count": 15}');
+```
+  json:= VarJSONCreate('{"Count": 15}');
+```
 
-"*json.Count*" refers to that specified property (=15). To access "Count" as the custom function representing the number of "Name/Value" pairs in the object (=1) simply use a different case (aka json.count or json.COUNT, ...)
+`json.Count` refers to that specified property (=15). To access `Count` as the custom function representing the number of "Name/Value" pairs in the object (=1) simply use a different case (aka `json.count` or `json.COUNT`, ...).
 
 ### Date values
 There is no specific type in JSON to handle dates. The usual behaviour is to format the date using *ISO 8601* rules.
@@ -67,6 +108,9 @@ There is no specific type in JSON to handle dates. The usual behaviour is to for
   LocalDate := json.Date;           //might raise conversion error if it was not converted to a TDateTime!
   LocalDate := AsDate(json.Date);   //ensures the correct type, but returns 0 if conversion fails!
 ```
+>[!NOTE]
+>For a string property of length 24 (like the `Date` above) a conversion is attempted using ISO8601 format. If successful, `json.Date` returns a TDateTime variant, otherwise the string value is returned.
+
 If a custom format is used/required, please use the "AsString/AsDate" functions with a specific format:
 ```
   json.Date := AsString(Now, 'YYYY/MM/DD');
