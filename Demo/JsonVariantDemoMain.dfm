@@ -6,8 +6,8 @@ object frmJVDemo: TfrmJVDemo
   Margins.Right = 5
   Margins.Bottom = 5
   Caption = 'JSON Variant Demo'
-  ClientHeight = 1187
-  ClientWidth = 1816
+  ClientHeight = 960
+  ClientWidth = 1634
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -17,10 +17,10 @@ object frmJVDemo: TfrmJVDemo
   PixelsPerInch = 144
   TextHeight = 25
   object pnlButtons: TPanel
-    Left = 1268
+    Left = 1087
     Top = 0
-    Width = 548
-    Height = 1187
+    Width = 547
+    Height = 960
     Margins.Left = 5
     Margins.Top = 5
     Margins.Right = 5
@@ -28,9 +28,11 @@ object frmJVDemo: TfrmJVDemo
     Align = alRight
     BevelOuter = bvNone
     TabOrder = 0
+    ExplicitLeft = 691
+    ExplicitHeight = 896
     DesignSize = (
-      548
-      1187)
+      547
+      960)
     object btnCreateJsonObject: TButton
       Left = 10
       Top = 42
@@ -137,8 +139,8 @@ object frmJVDemo: TfrmJVDemo
     end
     object btnClose: TButton
       Left = 10
-      Top = 1128
-      Width = 529
+      Top = 902
+      Width = 528
       Height = 38
       Margins.Left = 5
       Margins.Top = 5
@@ -150,69 +152,123 @@ object frmJVDemo: TfrmJVDemo
       ModalResult = 8
       TabOrder = 8
       OnClick = btnCloseClick
+      ExplicitTop = 838
     end
     object btnOwnership: TButton
       Left = 10
-      Top = 420
-      Width = 529
+      Top = 381
+      Width = 528
       Height = 38
       Margins.Left = 5
       Margins.Top = 5
       Margins.Right = 5
       Margins.Bottom = 5
-      Anchors = [akLeft, akRight, akBottom]
+      Anchors = [akLeft, akTop, akRight]
       Caption = 'Ownership considerations'
       TabOrder = 9
       OnClick = btnOwnershipClick
     end
     object btnCase: TButton
       Left = 10
-      Top = 492
-      Width = 529
+      Top = 453
+      Width = 528
       Height = 38
       Margins.Left = 5
       Margins.Top = 5
       Margins.Right = 5
       Margins.Bottom = 5
-      Anchors = [akLeft, akRight, akBottom]
+      Anchors = [akLeft, akTop, akRight]
       Caption = 'Case Sensitivity'
       TabOrder = 10
       OnClick = btnCaseClick
     end
     object btnConflicts: TButton
       Left = 10
-      Top = 564
-      Width = 529
+      Top = 525
+      Width = 528
       Height = 38
       Margins.Left = 5
       Margins.Top = 5
       Margins.Right = 5
       Margins.Bottom = 5
-      Anchors = [akLeft, akRight, akBottom]
+      Anchors = [akLeft, akTop, akRight]
       Caption = 'JSON Key/Name vs Function conflict'
       TabOrder = 11
       OnClick = btnConflictsClick
     end
     object btnDateTime: TButton
       Left = 10
-      Top = 636
-      Width = 529
+      Top = 597
+      Width = 528
       Height = 38
       Margins.Left = 5
       Margins.Top = 5
       Margins.Right = 5
       Margins.Bottom = 5
-      Anchors = [akLeft, akRight, akBottom]
+      Anchors = [akLeft, akTop, akRight]
       Caption = 'JSON Date/Time considerations'
       TabOrder = 12
       OnClick = btnDateTimeClick
+    end
+    object gbPath: TGroupBox
+      Left = 10
+      Top = 661
+      Width = 531
+      Height = 73
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
+      Anchors = [akLeft, akTop, akRight]
+      Caption = 'JSON Path'
+      TabOrder = 13
+      OnEnter = cbPathEnter
+      DesignSize = (
+        531
+        73)
+      object cbPath: TComboBox
+        Left = 5
+        Top = 25
+        Width = 376
+        Height = 33
+        Margins.Left = 5
+        Margins.Top = 5
+        Margins.Right = 5
+        Margins.Bottom = 5
+        Anchors = [akLeft, akTop, akRight]
+        TabOrder = 0
+        Text = '$..author'
+        OnEnter = cbPathEnter
+        Items.Strings = (
+          '$..author'
+          '$..book[*].title'
+          'store.book[2]'
+          '*.book[-1]'
+          '$.store..price'
+          '$..book..price'
+          '["store"]["book"][1]')
+      end
+      object btnPath: TButton
+        Left = 384
+        Top = 23
+        Width = 142
+        Height = 38
+        Margins.Left = 5
+        Margins.Top = 5
+        Margins.Right = 5
+        Margins.Bottom = 5
+        Anchors = [akTop, akRight]
+        Caption = 'Search ...'
+        TabOrder = 1
+        OnClick = btnPathClick
+      end
     end
   end
   object pnlClient: TPanel
     Left = 0
     Top = 0
-    Width = 1268
-    Height = 1187
+    Width = 1087
+    Height = 960
     Margins.Left = 5
     Margins.Top = 5
     Margins.Right = 5
@@ -220,10 +276,12 @@ object frmJVDemo: TfrmJVDemo
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 1
+    ExplicitWidth = 691
+    ExplicitHeight = 896
     object splitLog: TSplitter
       Left = 0
-      Top = 763
-      Width = 1268
+      Top = 537
+      Width = 1087
       Height = 5
       Cursor = crVSplit
       Margins.Left = 5
@@ -231,16 +289,15 @@ object frmJVDemo: TfrmJVDemo
       Margins.Right = 5
       Margins.Bottom = 5
       Align = alBottom
-      MinSize = 45
-      ExplicitLeft = 1665
-      ExplicitTop = 0
-      ExplicitWidth = 630
+      MinSize = 46
+      ExplicitTop = 473
+      ExplicitWidth = 691
     end
     object pnlJSON: TPanel
       Left = 0
       Top = 0
-      Width = 1268
-      Height = 763
+      Width = 1087
+      Height = 537
       Margins.Left = 5
       Margins.Top = 5
       Margins.Right = 5
@@ -248,9 +305,11 @@ object frmJVDemo: TfrmJVDemo
       Align = alClient
       BevelOuter = bvNone
       TabOrder = 0
+      ExplicitWidth = 691
+      ExplicitHeight = 473
       DesignSize = (
-        1268
-        763)
+        1087
+        537)
       object lblJSON: TLabel
         Left = 8
         Top = 8
@@ -263,10 +322,10 @@ object frmJVDemo: TfrmJVDemo
         Caption = 'JSON'
       end
       object memJson: TMemo
-        Left = 3
+        Left = 4
         Top = 43
-        Width = 1255
-        Height = 713
+        Width = 1072
+        Height = 487
         Margins.Left = 5
         Margins.Top = 5
         Margins.Right = 5
@@ -289,13 +348,15 @@ object frmJVDemo: TfrmJVDemo
           '')
         ScrollBars = ssVertical
         TabOrder = 0
+        ExplicitWidth = 676
+        ExplicitHeight = 423
       end
     end
     object pnlLog: TPanel
       Left = 0
-      Top = 768
-      Width = 1268
-      Height = 419
+      Top = 542
+      Width = 1087
+      Height = 418
       Margins.Left = 5
       Margins.Top = 5
       Margins.Right = 5
@@ -303,9 +364,11 @@ object frmJVDemo: TfrmJVDemo
       Align = alBottom
       BevelOuter = bvNone
       TabOrder = 1
+      ExplicitTop = 478
+      ExplicitWidth = 691
       DesignSize = (
-        1268
-        419)
+        1087
+        418)
       object lblLog: TLabel
         Left = 8
         Top = 8
@@ -318,10 +381,10 @@ object frmJVDemo: TfrmJVDemo
         Caption = 'Log'
       end
       object btnRealignLog: TSpeedButton
-        Left = 1225
-        Top = 9
+        Left = 1044
+        Top = 10
         Width = 35
-        Height = 33
+        Height = 32
         Margins.Left = 5
         Margins.Top = 5
         Margins.Right = 5
@@ -355,13 +418,13 @@ object frmJVDemo: TfrmJVDemo
           00000000000000000000D3D3D3D3D3D3D3D3D3D3D3D3D3D3D3D3D3D3D3D3D3D3
           D3D3CCCCCC000000000000000000000000000000000000000000}
         OnClick = btnRealignLogClick
-        ExplicitLeft = 509
+        ExplicitLeft = 648
       end
       object memLog: TMemo
         Left = 8
         Top = 43
-        Width = 1250
-        Height = 369
+        Width = 1068
+        Height = 368
         Margins.Left = 5
         Margins.Top = 5
         Margins.Right = 5
@@ -369,6 +432,8 @@ object frmJVDemo: TfrmJVDemo
         Anchors = [akLeft, akTop, akRight, akBottom]
         ScrollBars = ssVertical
         TabOrder = 0
+        ExplicitWidth = 672
+        ExplicitHeight = 369
       end
     end
   end

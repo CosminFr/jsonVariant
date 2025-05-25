@@ -52,6 +52,9 @@ function PeekJsonArray (const aValue : Variant) : TJSONArray;
 function NamesOf(const aValue: Variant): TStringDynArray;
 function ValuesOf(const aValue: Variant): TArray<Variant>;
 
+function JSONPath(const aValue: Variant; const aPath: String): TArray<Variant>;
+
+
 /// Conversion functions for setting values
 function AsDate(aValue: String; aFormat: String = 'ISO8601') : TDateTime;
 function AsBoolean(aValue: String) : Boolean;
@@ -93,14 +96,19 @@ type
 
   TVarJsonVariant = class(TInvokeableVariantType)
   protected
-    //Added to access "Property By Index"
+    /// Added to access "Property By Index"
     procedure DispInvoke(Dest: PVarData; [Ref] const Source: TVarData; CallDesc: PCallDesc; Params: Pointer); override;
 
-    //Avoid base class behaviour (UPPERCASE) property names. JSON is Case Sensitive!!!
+    /// Avoid base class behaviour (UPPERCASE) property names. JSON is Case Sensitive!!!
     function FixupIdent(const aText: string): string; override;
 
-    // Create the proper Variant from provided JSON Value. That means standard variant for ordinal values! (Numeric/String)
+    /// Create the proper Variant from provided JSON Value. That means standard variant for ordinal values! (Numeric/String)
     function VariantFromJsonValue(const aJsonValue: TJSONValue): Variant; overload;
+
+    /// Process a JSON Path and return matching values
+    function VariantPathFromJsonValue(const aJsonValue: TJSONValue; const aJsonPath: String): Variant;
+    /// Recursive processing elements of the JSON Path updating the aResults parameter
+    procedure ProcessPathFromJsonValue(const aJsonValue: TJSONValue; const aJsonPath: String; var aResults: Variant);
 
     /// Note: The following functions CREATE the TJSONValue!
     /// The ownership is passed to the caller = pay attention to memory leaks...
@@ -159,6 +167,8 @@ function PrintVarData(const aData: TVarData) : String;
 begin
   if aData.VType = VarJSON then
     Result := PrintJsonVarData(TJsonVarData(aData))
+  else if VarIsArray(Variant(aData)) then
+    Result := Format('VType=%d; Array Size=%d', [aData.VType, VarArrayHighBound(Variant(aData), 1)+1])
   else
     Result := Format('VType=%d; AsStr=%s', [aData.VType, VarToStr(Variant(aData))]);
 end;
@@ -366,7 +376,7 @@ begin
       else begin
         Variant(Dest) := jSource.ToJSON;
 {$IFDEF USE_LOGGER}
-        Logger.ErrorFmt('Unexpected Variant (input=%s)! Result might be unexpected. (output=%s)', [PrintVarData(Source), PrintVarData(Dest)]);
+        Log.Error('Unexpected Variant (input=%s)! Result might be unexpected. (output=%s)', [PrintVarData(Source), PrintVarData(Dest)]);
 {$ENDIF}
       end;
     end; //case AVarType (else)
@@ -465,16 +475,26 @@ begin
       if Result then
         Variant(Dest) := VariantFromJsonValue(jSource)
     end;
-  end else if MatchText(Name, ['IndexOf', 'FindValue']) then begin
+  end else if SameText(Name, 'IndexOf') then begin
     //There must an argument AND the source must be assigned (accept both array & object)
     Result := (Length(Arguments) = 1) and Assigned(jSource);
     if Result then
       Variant(Dest) := IndexOf(jSource, Variant(Arguments[0]));
+  end else if SameText(Name, 'FindValue') then begin
+    //There must be one string argument AND the source must be assigned (accepts both array & object)
+    Result := (Length(Arguments) = 1) and Assigned(jSource) and VarDataIsStr(Arguments[0]);
+    if Result then
+      Variant(Dest) := VariantFromJsonValue(jSource.FindValue(VarDataToStr(Arguments[0])));
   end else if MatchText(Name, ['HasProperty', 'HasAttribute', 'HasName', 'HasKey']) then begin
     //There must an argument AND the source must be an object
     Result := (Length(Arguments) = 1) and (jSource is TJSONObject);
     if Result then
       Variant(Dest) := Assigned(TJSONObject(jSource).GetValue(Variant(Arguments[0])));
+  end else if MatchText(Name, ['JsonPath', 'Path']) then begin
+    //There must be one argument of type String!
+    Result := (Length(Arguments) = 1) and VarDataIsStr(Arguments[0]);
+    if Result then
+      Variant(Dest) := VariantPathFromJsonValue(jSource, VarDataToStr(Arguments[0]));
   end else
     Result := inherited DoFunction(Dest, V, Name, Arguments);
 end;
@@ -705,7 +725,7 @@ begin
     end else begin
       Result := TJSONString.Create(VarToStr(aValue));
 {$IFDEF USE_LOGGER}
-      Logger.ErrorFmt('Unexpected Variant (input=%s)! Result might be empty or unexpected. (JSONString=%s)', [PrintVarData(TVarData(aValue)), Result.Value]);
+      Log.Error('Unexpected Variant (input=%s)! Result might be empty or unexpected. (JSONString=%s)', [PrintVarData(TVarData(aValue)), Result.Value]);
 {$ENDIF}
     end;
 //  TBC - Known unhandled variant types:
@@ -726,7 +746,7 @@ begin
   else begin
     Result := nil;
 {$IFDEF USE_LOGGER}
-    Logger.ErrorFmt('Unexpected Variant in PeekJsonValue: %s', [PrintVarData(TVarData(aValue))]);
+    Log.Error('Unexpected Variant in PeekJsonValue: %s', [PrintVarData(TVarData(aValue))]);
 {$ENDIF}
   end;
 end;
@@ -749,14 +769,148 @@ begin
     TJsonVarData(Result).VType := VarJSON;
     TJsonVarData(Result).Value := aJsonValue;
     TJsonVarData(Result).Owned := False;
-//    Logger.Debug('new VarJSON (linked): ' + PrintJsonVarData(TJsonVarData(Result)));
   end else if Assigned(aJsonValue) then begin
     Result := aJsonValue.Value;   //Unexpected value!
 {$IFDEF USE_LOGGER}
-    Logger.ErrorFmt('Unsupported JsonValue! (Class=%s, Value=%s, JSON=%s)', [aJsonValue.ClassName, aJsonValue.Value, aJsonValue.ToJSON]);
+    Log.Error('Unsupported JsonValue! (Class=%s, Value=%s, JSON=%s)', [aJsonValue.ClassName, aJsonValue.Value, aJsonValue.ToJSON]);
 {$ENDIF}
   end;
-//  Logger.DebugFmt('VariantFromJsonValue Result: %s', [PrintVarData(TVarData(Result))]);
+end;
+
+function TVarJsonVariant.VariantPathFromJsonValue(const aJsonValue: TJSONValue; const aJsonPath: String): Variant;
+begin
+  VarClear(Result);
+  if aJsonPath = '' then
+    raise EJSONPathException.Create('Empty path is not valid');
+
+  ProcessPathFromJsonValue(aJsonValue, aJsonPath, Result);
+end;
+
+procedure TVarJsonVariant.ProcessPathFromJsonValue(const aJsonValue: TJSONValue; const aJsonPath: String; var aResults: Variant);
+const
+  TT_ERROR = 0;
+  TT_NAME  = 1;
+  TT_INDEX = 2;
+  TT_EOF   = 3;
+
+  //Extract/Consume next token from the path
+  function GetNextToken(var aPath: String; var aType: Integer): String;
+  var
+    nLen   : Integer;
+  begin
+    Result := '';
+    aType  := TT_NAME;
+    nLen   := 0;
+    if aPath.StartsWith('$') then       //Ignore "$" at start
+      aPath := aPath.Remove(0,1);
+    if aPath.StartsWith('.') then       //Remove first "."
+      aPath := aPath.Remove(0,1);
+    if aPath = '' then
+      aType  := TT_EOF
+    else if aPath.StartsWith('.') then begin
+      Result := '..';
+      aPath  := aPath.Trim(['.']);
+    end else if aPath.StartsWith('[') then begin
+      nLen := FindDelimiter(']', aPath);
+      if nLen > 0 then
+        aType := TT_INDEX
+      else
+        raise EJSONPathException.CreateFmt('Missing "]" bracket (Path="%s").', [aPath]);
+      Inc(nLen); //include the "]" in token!
+    end else begin
+      nLen   := FindDelimiter('.[', aPath);
+      if nLen = 0 then
+        nLen := aPath.Length +1;
+    end;
+    if nLen > 0 then begin
+      Result := System.Copy(aPath, 1, nLen -1);
+      aPath  := System.Copy(aPath, nLen, aPath.Length);
+    end;
+    //Remove brackets from [XXX] tokens & check for name reclasification (due qoutes)
+    if aType = TT_INDEX then begin
+      Assert(Result.StartsWith('[') and Result.EndsWith(']'), 'Invalid "index" token! Missing "[|]" brakets.');
+      Result := System.Copy(Result, 2, Result.Length - 2);    //remove first and last chars
+      if Result.StartsWith('"') then begin
+        Result := Result.DeQuotedString('"');
+        aType  := TT_NAME;
+      end else if aPath.StartsWith('''') then begin
+        Result := Result.DeQuotedString('''');
+        aType  := TT_NAME;
+      end;
+    end;
+  end;
+
+  procedure Parse(const aJsonValue: TJSONValue; const aJsonPath: String; var aResults: Variant; aRecursive: Boolean = False);
+  var
+    jValue: TJSONValue;
+    jPair : TJSONPair;
+  begin
+    if aJsonValue is TJSONObject then begin
+      for jPair in TJSONObject(aJsonValue) do
+        if (jPair.JsonValue is TJSONObject) or (jPair.JsonValue is TJSONArray) then begin
+          ProcessPathFromJsonValue(jPair.JsonValue, aJsonPath, aResults);
+          if aRecursive then
+            Parse(jPair.JsonValue, aJsonPath, aResults, aRecursive);
+        end;
+    end else if (aJsonValue is TJSONArray) then begin
+      for jValue in TJSONArray(aJsonValue) do
+        if (jValue is TJSONObject) or (jValue is TJSONArray) then begin
+          ProcessPathFromJsonValue(jValue, aJsonPath, aResults);
+          if aRecursive then
+            Parse(jValue, aJsonPath, aResults, aRecursive);
+        end;
+    end;
+  end;
+
+var
+  sToken, sPath: String;
+  nType, nLen : Integer;
+  jValue: TJSONValue;
+  jPair : TJSONPair;
+begin
+  if not Assigned(aJsonValue) then
+    Exit;
+  //Split next token
+  sPath  := aJsonPath;
+  sToken := GetNextToken(sPath, nType);
+  if nType = TT_INDEX then begin
+    //Process index token...
+    if aJsonValue is TJSONArray then begin
+      if sToken = '*' then begin
+        Parse(aJsonValue, sPath, aResults);
+      end else if TryStrToInt(sToken, nLen) then begin
+        if nLen < 0 then
+          nLen := TJSONArray(aJsonValue).Count + nLen;
+        jValue := TJSONArray(aJsonValue).Items[nLen];
+        ProcessPathFromJsonValue(jValue, sPath, aResults);
+      end;
+      //TODO - process other indices start:stop:step...
+    end else
+      raise EJSONPathException.CreateFmt('Index token expects an Array element! (Token="%s").', [sToken]);
+  end else if nType = TT_NAME then begin
+    //Process name token...
+    if sToken = '..' then
+      Parse(aJsonValue, sPath, aResults, True)
+    else if sToken = '*' then begin
+      Parse(aJsonValue, sPath, aResults);
+    end else begin
+      jValue := TJSONObject(aJsonValue).FindValue(sToken);
+      if Assigned(jValue) then
+        ProcessPathFromJsonValue(jValue, sPath, aResults)
+    end;
+  end else if nType = TT_EOF then begin
+    if VarIsEmpty(aResults) then
+      aResults := VariantFromJsonValue(aJsonValue)
+    else if VarIsArray(aResults) then begin
+      nLen := VarArrayHighBound(aResults, 1);
+      Inc(nLen);
+      VarArrayRedim(aResults, nLen);
+      aResults[nLen] := VariantFromJsonValue(aJsonValue);
+    end else begin
+      //Make array [prev & new]
+      aResults := VarArrayOf([aResults, VariantFromJsonValue(aJsonValue)]);
+    end;
+  end;
 end;
 
 
@@ -904,6 +1058,13 @@ begin
     Result := nil;
 end;
 
+function JSONPath(const aValue: Variant; const aPath: String): TArray<Variant>;
+begin
+  if VarIsJSON(aValue) then
+    Result := TArray<Variant>(aValue.Path(aPath))
+  else
+    Result := nil;
+end;
 
 initialization
   _VarDataJSON := TVarJsonVariant.Create;

@@ -31,6 +31,9 @@ type
     btnCase: TButton;
     btnConflicts: TButton;
     btnDateTime: TButton;
+    gbPath: TGroupBox;
+    cbPath: TComboBox;
+    btnPath: TButton;
     procedure btnCloseClick(Sender: TObject);
     procedure btnCreateJsonObjectClick(Sender: TObject);
     procedure btnUpdateJsonObjectClick(Sender: TObject);
@@ -45,6 +48,8 @@ type
     procedure btnCaseClick(Sender: TObject);
     procedure btnConflictsClick(Sender: TObject);
     procedure btnDateTimeClick(Sender: TObject);
+    procedure btnPathClick(Sender: TObject);
+    procedure cbPathEnter(Sender: TObject);
   private
     procedure StartTest(const aName: String);
     procedure Log(const aText: String);
@@ -451,6 +456,90 @@ begin
   Log('System Date from JSON: ' + DateToStr(d));
 
   memJson.Text := j.AsText;
+end;
+
+const
+  JSON_PATH_DEMO  = '''
+                    { "store": {
+                        "book": [
+                          { "category": "reference",
+                            "author": "Nigel Rees",
+                            "title": "Sayings of the Century",
+                            "price": 8.95
+                          },
+                          { "category": "fiction",
+                            "author": "Evelyn Waugh",
+                            "title": "Sword of Honour",
+                            "price": 12.99
+                          },
+                          { "category": "fiction",
+                            "author": "Herman Melville",
+                            "title": "Moby Dick",
+                            "isbn": "0-553-21311-3",
+                            "price": 8.99
+                          },
+                          { "category": "fiction",
+                            "author": "J. R. R. Tolkien",
+                            "title": "The Lord of the Rings",
+                            "isbn": "0-395-19395-8",
+                            "price": 22.99
+                          }
+                        ],
+                        "bicycle": {
+                          "color": "red",
+                          "price": 19.95
+                        }
+                      }
+                    }
+                    ''';
+procedure TfrmJVDemo.cbPathEnter(Sender: TObject);
+begin
+  memJson.Text := JSON_PATH_DEMO;
+end;
+
+
+function  VarToText(aSource: Variant): String;
+var
+  i : Integer;
+  v : Variant;
+begin
+  if VarIsArray(aSource) then begin
+    Result := '[';
+    for v in TArray<Variant>(aSource) do
+      Result := Result + '"' + VarToText(v) + '", ';
+
+    Result := Result + ']';
+  end else
+    Result := VarToStr(aSource);
+
+end;
+
+procedure TfrmJVDemo.btnPathClick(Sender: TObject);
+var
+  json : Variant;
+  vRes : Variant;
+begin
+  //uses the examples from https://goessner.net/articles/JsonPath/
+  memJson.Text := JSON_PATH_DEMO;
+  json := VarJSONCreate(memJson.Text);
+
+  StartTest('JSON Path');
+
+  try
+    vRes := json.FindValue(cbPath.Text);
+  except
+    on E: Exception do
+      vRes := E.Message;
+  end;
+  Log(Format('FindValue("%s"): "%s"', [cbPath.Text, VarToText(vRes)]));
+
+  try
+    vRes := json.Path(cbPath.Text);
+  except
+    on E: Exception do
+      vRes := E.Message;
+  end;
+  Log(Format('JSONPath("%s"): "%s"', [cbPath.Text, VarToText(vRes)]));
 end;
 
 end.
