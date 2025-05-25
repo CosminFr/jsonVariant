@@ -5,6 +5,9 @@ uses
   FastMM5,
 {$ENDIF}
   Vcl.Forms,
+{$IFDEF USE_LOGGER}
+  EasyLogger,
+{$ENDIF}
   JsonVariantDemoMain in 'JsonVariantDemoMain.pas' {frmJVDemo},
   JsonVariant in '..\JsonVariant.pas';
 
@@ -12,6 +15,10 @@ uses
 
 begin
   Application.Initialize;
+{$IFDEF USE_LOGGER}
+  InitializeLogger();
+  Log.LogLevel := LL_TRACE;
+{$ENDIF}
   Application.MainFormOnTaskbar := True;
   Application.CreateForm(TfrmJVDemo, frmJVDemo);
   Application.Run;

@@ -210,7 +210,7 @@ To avoid type casting, if you know the result is a JSON object.
 To avoid type casting, if you know the result is a JSON array.
 
 ***NamesOf(Variant): TStringDynArray;***  
-Returns a dynamic string array with the key names. Similar with [Names property](#names-keys) but easier to use in a `for in` loop:
+Returns a dynamic string array with the key names. Similar with [Names](#names-keys) property but easier to use in a `for in` loop:
 ```
     for name in NamesOf(json) do
       Log(name + '=' + VarToStr(json.Values(name)));
