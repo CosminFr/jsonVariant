@@ -138,14 +138,55 @@ Returns the Variant Value on position `i`. May raise "out of range" errors!
 ***Items, Values***  
 Returns a variant array with the Values. This creates a copy of all values as variants! 
 
-***IndexOf(str), FindValue(str)***  
+***Clear, Empty***  
+As one would expect removes all pairs/values from the Objecy or Array.
+
+***IndexOf(str)***  
 Returns the index of the value that matches the `str` param; -1 if no match found. 
 > [!TIP] 
 > For objects, the `str` is also compared with the key name.  
 > Used to find the position of a specific property in the JSON Object.
     
-***Clear, Empty***  
-As one would expect removes all pairs/values from the Objecy or Array.
+***FindValue(str)***  
+Returns the variant containing the TJSNOValue as provided by `FindValue(str)`. It uses the `System.JSON.TJSONPathParser` to evaluate the `str` param.  
+Does not handle `*` or `..` "wildcard" patterns.
+    
+***JSONPath(str), Path(str)***  
+Inpired from [goessner.net/articles/JsonPath](https://goessner.net/articles/JsonPath/). 
+
+The syntax to write paths is similar to XPath but in a Json way. The following XPath expression:
+> /store/book[1]/title
+
+would look like (dot notation)
+> store.book[0].title
+
+or (bracket notation)  
+> ['store']['book'][0]['title']
+
+The dot (.) token is used to access the object elements:
+> ex: object.key
+
+The bracket ([]) token is used to access array or object elements:
+  * In array: cities[0]
+  * In object: ["city"]["name"] or ['city']['name']
+ 
+The quote (" or ') is used to introduce a literal when the element is being written in bracket notation:
+>  ex:["first"]["second"] = ['first']['second'] = first.second
+
+JSONPath allows the wildcard symbol `*` for member names and array indices and the recursive descent operator `..` 
+> \*.book[0].title => returns first book's title from any element, not only `store`  
+> ..title => returns all titles  
+> store.book[\*].title => returns all titles  
+
+Negative value in an array index token (the number between [] brackets) suggests position from end of the array:
+> ..book[-1]  => last book
+
+> [!WARNING]
+> Values exceeding the array size will raise "out of range" errors!
+
+> [!TODO]  
+> the array slice syntax proposal [start:end:step] is not supported yet!
+
 
 
 #### Specific to Array
