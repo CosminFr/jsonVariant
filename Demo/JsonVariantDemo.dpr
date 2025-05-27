@@ -6,7 +6,7 @@ uses
 {$ENDIF}
   Vcl.Forms,
 {$IFDEF USE_LOGGER}
-  EasyLogger,
+  ZenLogger,
 {$ENDIF}
   JsonVariantDemoMain in 'JsonVariantDemoMain.pas' {frmJVDemo},
   JsonVariant in '..\JsonVariant.pas';

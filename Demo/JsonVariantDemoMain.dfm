@@ -28,8 +28,6 @@ object frmJVDemo: TfrmJVDemo
     Align = alRight
     BevelOuter = bvNone
     TabOrder = 0
-    ExplicitLeft = 691
-    ExplicitHeight = 896
     DesignSize = (
       547
       960)
@@ -152,7 +150,6 @@ object frmJVDemo: TfrmJVDemo
       ModalResult = 8
       TabOrder = 8
       OnClick = btnCloseClick
-      ExplicitTop = 838
     end
     object btnOwnership: TButton
       Left = 10
@@ -276,8 +273,6 @@ object frmJVDemo: TfrmJVDemo
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 1
-    ExplicitWidth = 691
-    ExplicitHeight = 896
     object splitLog: TSplitter
       Left = 0
       Top = 537
@@ -305,8 +300,6 @@ object frmJVDemo: TfrmJVDemo
       Align = alClient
       BevelOuter = bvNone
       TabOrder = 0
-      ExplicitWidth = 691
-      ExplicitHeight = 473
       DesignSize = (
         1087
         537)
@@ -348,8 +341,6 @@ object frmJVDemo: TfrmJVDemo
           '')
         ScrollBars = ssVertical
         TabOrder = 0
-        ExplicitWidth = 676
-        ExplicitHeight = 423
       end
     end
     object pnlLog: TPanel
@@ -364,8 +355,6 @@ object frmJVDemo: TfrmJVDemo
       Align = alBottom
       BevelOuter = bvNone
       TabOrder = 1
-      ExplicitTop = 478
-      ExplicitWidth = 691
       DesignSize = (
         1087
         418)
@@ -432,8 +421,6 @@ object frmJVDemo: TfrmJVDemo
         Anchors = [akLeft, akTop, akRight, akBottom]
         ScrollBars = ssVertical
         TabOrder = 0
-        ExplicitWidth = 672
-        ExplicitHeight = 369
       end
     end
   end

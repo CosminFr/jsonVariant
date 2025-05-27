@@ -260,7 +260,6 @@ end;
 procedure TVarJsonVariant.Clear(var V: TVarData);
 var J: TJsonVarData absolute V;
 begin
-//  Logger.Debug('TVarJsonVariant.Clear: ' + PrintVarData(V));
   if (V.VType and varTypeMask) = VarJSON then begin
     if J.Owned then
       J.Value.Free();
@@ -275,15 +274,21 @@ procedure TVarJsonVariant.ClearJson(const aValue: TJSONValue);
 var
   jObj : TJsonObject absolute aValue;
   jArr : TJSONArray  absolute aValue;
+  elem : TJSONValue;
+  pair : TJSONPair;
 begin
   if (aValue is TJSONArray) then begin
-//    jArr := TJSONArray(aValue);
-    while jArr.Count > 0 do
-      jArr.Remove(0);
+    while jArr.Count > 0 do begin
+      elem := jArr.Remove(0);
+      if elem.Owned then
+        elem.Free;
+    end;
   end else if (aValue is TJSONObject) then begin
-//    jObj := TJSONObject(aValue);
-    while jObj.Count > 0 do
-      jObj.RemovePair(jObj.Pairs[0].JsonString.Value);
+    while jObj.Count > 0 do begin
+      pair := jObj.RemovePair(jObj.Pairs[0].JsonString.Value);
+      if pair.Owned then
+        pair.Free;
+    end;
   end;
 end;
 
@@ -293,7 +298,6 @@ begin
     TJsonVarData(Dest).Value := TJsonVarData(Source).Value;
     TJsonVarData(Dest).Owned := False;
     Dest.VType               := VarJSON;
-//    Logger.DebugFmt('TVarJsonVariant.Copy: New Value=%s', [PrintVarData(Dest)]);
   end else
     inherited;
 end;
@@ -503,6 +507,8 @@ function TVarJsonVariant.DoProcedure(const V: TVarData; const Name: string; cons
 var
   jSource : TJSONValue;
   jValue  : TJSONValue;
+  elem : TJSONValue;
+  pair : TJSONPair;
 begin
   jSource := TJsonVarData(V).Value;
   if SameText(Name, 'Add') then begin
@@ -518,8 +524,14 @@ begin
       jValue := JsonValueFromVariant(Variant(Arguments[0]));
       if jValue is TJSONArray then begin
         //if the value is an Array, append all those values instead of adding the list as one element (as Add would do)
-        for var elem in TJSONArray(jValue) do
-          TJSONArray(jSource).AddElement(elem);
+        try
+          while TJSONArray(jValue).Count > 0 do begin
+            elem := TJSONArray(jValue).Remove(0);       //extract from input
+            TJSONArray(jSource).AddElement(elem);       //add to the Source list
+          end;
+        finally
+          jValue.Free;                                  //clean-up local array (after all elements moved to the source)
+        end;
       end else //if not array, behaves same as Add
         TJSONArray(jSource).AddElement(jValue);
     end;
@@ -528,13 +540,19 @@ begin
     if (jSource is TJSONArray) then begin
       //There must be only one argument of type Integer!
       Result := (Length(Arguments) = 1) and (Arguments[0].VType = varInteger);
-      if Result then
-        TJSONArray(jSource).Remove(Arguments[0].VInteger);
+      if Result then begin
+        elem := TJSONArray(jSource).Remove(Arguments[0].VInteger);
+        if Assigned(elem) and elem.Owned then
+          elem.Free;
+      end;
     end else if (jSource is TJSONObject) then begin
       //There must be only one argument of type String!
       Result := (Length(Arguments) = 1) and (VarDataIsStr(Arguments[0]));
-      if Result then
-        TJSONObject(jSource).RemovePair(VarDataToStr(Arguments[0]));
+      if Result then begin
+        pair := TJSONObject(jSource).RemovePair(VarDataToStr(Arguments[0]));
+        if Assigned(pair) and pair.Owned then
+          pair.Free;
+      end;
     end else
       Result := False;
   end else if MatchText(Name, ['Clear', 'Empty']) then begin
@@ -885,8 +903,7 @@ begin
         ProcessPathFromJsonValue(jValue, sPath, aResults);
       end;
       //TODO - process other indices start:stop:step...
-    end else
-      raise EJSONPathException.CreateFmt('Index token expects an Array element! (Token="%s").', [sToken]);
+    end;
   end else if nType = TT_NAME then begin
     //Process name token...
     if sToken = '..' then

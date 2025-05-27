@@ -497,10 +497,8 @@ begin
   memJson.Text := JSON_PATH_DEMO;
 end;
 
-
 function  VarToText(aSource: Variant): String;
 var
-  i : Integer;
   v : Variant;
 begin
   if VarIsArray(aSource) then begin
@@ -511,7 +509,6 @@ begin
     Result := Result + ']';
   end else
     Result := VarToStr(aSource);
-
 end;
 
 procedure TfrmJVDemo.btnPathClick(Sender: TObject);
