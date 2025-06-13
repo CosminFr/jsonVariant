@@ -5,15 +5,7 @@ jsonVariant is custom variant implementation for making working with JSON in Del
 
 Homepage: https://github.com/CosminFr/jsonVariant
 
-### Licence
-jsonVariant is dual-licensed. You may choose to use it under the restrictions of the **GPL v3 licence** at no cost to you, or you may purchase a **commercial licence**.  
-
-A commercial licence grants you the right to use jsonVariant in your own applications, royalty free, without any requirement to disclose your source code nor any modifications to any other party. 
-A commercial licence is sold per developer but it must take into account the level of support required. Please connect through [LinkedIn](https://www.linkedin.com/in/cosminfrentiu/) to show interest and request a quote or an invoice.  Payment may be made via PayPal, or via bank transfer.  Details will be provided on the invoice.
-
-Please consider supportting this project by donating ("Buy me a coffee", "Thanks.dev", "Paypal").
-
-## Usage Instructions
+## 👩‍🏫 Usage Instructions
 Simply add JsonVariant.pas in your project and start using it.
 ```
 uses
@@ -99,7 +91,7 @@ For example, a JSON object with property "Count":
   json:= VarJSONCreate('{"Count": 15}');
 ```
 
-`json.Count` refers to that specified property (=15). To access `Count` as the custom function representing the number of "Name/Value" pairs in the object (=1) simply use a different case (aka `json.count` or `json.COUNT`, ...).
+`json.Count` refers to that specified property `=15`. To access `Count` as the custom function representing the number of "Name/Value" pairs in the object `=1` simply use a different case (aka `json.count` or `json.COUNT`, ...).
 
 ### Date values
 There is no specific type in JSON to handle dates. The usual behaviour is to format the date using *ISO 8601* rules.
@@ -117,9 +109,9 @@ If a custom format is used/required, please use the "AsString/AsDate" functions 
   LocalDate := AsDate(json.Date, 'YYYY/MM/DD');
 ```
 
-### Custom properties and functions
+## 🧬 Custom properties and functions
 
-#### For both Object and Array
+### For both Object and Array
 
 ***ToString, AsString***  
 Calls "ToString" on the associated TJSONValue.
@@ -189,7 +181,7 @@ Negative value in an array index token (the number between [] brackets) suggests
 
 
 
-#### Specific to Array
+### Specific to Array
 
 ***Add(element)***  
 Where "element" is a variant to be added to the list/array.
@@ -206,7 +198,7 @@ However, if the element is an array, all its elements are added to the list (ins
 Removes the element on position "i".  
 May raise "out of range" errors!
 
-#### Specific to Object
+### Specific to Object
 
 ***Items(name), Values(name), Get(name)***  
 Specific for objects, these functions accept a string value representing the key name and returns the Variant Value for that property.  
@@ -229,7 +221,7 @@ Checks if the object has a property with the specified name. True if property ex
 Returns a variant array with the key names.  
 
 
-#### General functions
+### General functions
 
 ***VarIsJSON, VarIsJsonObject, VarIsJsonArray***  
 Boolean functions to check if the provided variant is JSON (Object or Array).
@@ -261,4 +253,12 @@ Returns a dynamic string array with the key names. Similar with [Names](#names-k
 Returns a dynamic Variant array with the values of the JSON Object/Array. This is a copy (clone) of the source JSON variant values! 
 
 
+## 📜 License
+Dual-licensed:
+- **GPL v3 licence** - Use for free, under the restrictions of the **GPL v3 licence**, or 
+- Purchase a **commercial licence**. Which grants you the right to use in your own applications, royalty free, without any requirement to disclose your source code nor any modifications to any other party. [Contact ZenDev4D](mailto:contact@zendev4d.com) for details.
 
+Please consider supportting this project by donating ("Buy me a coffee", "Thanks.dev", "Paypal").
+
+## 🙏 Contributions
+Feel free to submit pull requests, report bugs or suggest improvements. This project is intended to stay small but powerful.
