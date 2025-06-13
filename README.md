@@ -256,7 +256,7 @@ Returns a dynamic Variant array with the values of the JSON Object/Array. This i
 ## 📜 License
 Dual-licensed:
 - **GPL v3 licence** - Use for free, under the restrictions of the **GPL v3 licence**, or 
-- Purchase a **commercial licence**. Which grants you the right to use in your own applications, royalty free, without any requirement to disclose your source code nor any modifications to any other party. [Contact ZenDev4D](mailto:contact@zendev4d.com) for details.
+- Purchase a **commercial licence**. Which grants you the right to use in your own applications, royalty free, without any requirement to disclose your source code nor any modifications to any other party. [Contact ZenDev4D](mailto:contact%40zendev4d.com?subject=Licence%20for%20jsonVariant) for details.
 
 Please consider supportting this project by donating ("Buy me a coffee", "Thanks.dev", "Paypal").
 
